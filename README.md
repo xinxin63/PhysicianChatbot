@@ -1,6 +1,6 @@
 # PhysicianChatbot
 Databricks hackathon 2025
-%md
+
 ## Goal:
 We are building a helpful AI chatbot that works as a physician which can help physicians or patients to diagnose based on the patients' symptoms and then provide the recommended approaches for the treatment.
 
