@@ -70,8 +70,8 @@ rag_chain_config ={
     "retriever_config": {
         "chunk_template": "Passage: {chunk_text}\n",
         "data_pipeline_tag": "poc",
-        "parameters": {"k": 5, "query_type": "ann"},
-        "schema": {"chunk_text": "content", "document_uri": "url", "primary_key": "id"},
+        "parameters": {"k": 5, "query_type": "HYBRID"},
+        "schema": {"chunk_text": "content",  "primary_key": "id"},
         "vector_search_index": "workspace.default.transcriptiondataindex_v2",
     },
 }
@@ -211,6 +211,31 @@ MODEL_NAME_FQN = f"{catalog}.{db}.{MODEL_NAME}"
 
 # COMMAND ----------
 
+def wait_for_model_serving_endpoint_to_be_ready(endpoint_name):
+    '''Wait for a model serving endpoint to be ready'''
+    from databricks.sdk import WorkspaceClient
+    from databricks.sdk.service.serving import EndpointStateReady, EndpointStateConfigUpdate
+    import time
+
+    # Wait for it to be ready
+    w = WorkspaceClient()
+    state = ""
+    for i in range(400):
+        state = w.serving_endpoints.get(endpoint_name).state
+        if state.config_update == EndpointStateConfigUpdate.IN_PROGRESS:
+            if i % 40 == 0:
+                print(f"Waiting for endpoint to deploy {endpoint_name}. Current state: {state}")
+            time.sleep(10)
+        elif state.ready == EndpointStateReady.READY:
+          print('endpoint ready.')
+          return
+        else:
+          break
+    raise Exception(f"Couldn't start the endpoint, timeout, please check your endpoint for more details: {state}")
+
+
+# COMMAND ----------
+
 instructions_to_reviewer = f"""### Instructions for Testing the our Databricks Documentation Chatbot assistant
 
 Your inputs are invaluable for the development team. By providing detailed feedback and corrections, you help us fix issues and improve the overall quality of the application. We rely on your expertise to identify any gaps or areas needing enhancement.
@@ -236,6 +261,10 @@ deployment_info = agents.deploy(model_name=MODEL_NAME_FQN, model_version=uc_regi
 
 # Add the user-facing instructions to the Review App
 agents.set_review_instructions(MODEL_NAME_FQN, instructions_to_reviewer)
+
+# wait_for_model_serving_endpoint_to_be_ready(deployment_info.endpoint_name)
+
+# COMMAND ----------
 
 wait_for_model_serving_endpoint_to_be_ready(deployment_info.endpoint_name)
 
