@@ -35,6 +35,7 @@
 # MAGIC Data preparation: Embedding Generation \
 # MAGIC RAG app: virtual_physician_chatbot \
 # MAGIC RAG chain config: rag_chain_config.yaml
+# MAGIC RAG chatbot UI: physicianchatbot_2025_06_09-21_19
 # MAGIC
 
 # COMMAND ----------
